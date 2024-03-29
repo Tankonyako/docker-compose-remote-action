@@ -28,11 +28,6 @@ if [ -z "$SSH_PRIVATE_KEY" ]; then
     exit 1
 fi
 
-if [ -z "$SSH_HOST_PUBLIC_KEY" ]; then
-    echo "Input ssh_host_public_key is required!"
-    exit 1
-fi
-
 if [ -z "$DOCKER_COMPOSE_FILENAME" ]; then
   DOCKER_COMPOSE_FILENAME=docker-compose.yml
 fi
@@ -92,8 +87,10 @@ eval "$(ssh-agent)"
 ssh-add "$HOME/.ssh/private_key"
 
 log "Adding known hosts"
-printf '%s %s\n' "$SSH_HOST" "$SSH_HOST_PUBLIC_KEY" >> /etc/ssh/ssh_known_hosts
-if [ -n "$SSH_JUMP_HOST" ]; then
+if [ -n "$SSH_HOST_PUBLIC_KEY" ]; then
+  printf '%s %s\n' "$SSH_HOST" "$SSH_HOST_PUBLIC_KEY" >> /etc/ssh/ssh_known_hosts
+fi
+if [ -n "$SSH_JUMP_PUBLIC_KEY" ]; then
   printf '%s %s\n' "$SSH_JUMP_HOST" "$SSH_JUMP_PUBLIC_KEY" >> /etc/ssh/ssh_known_hosts
 fi
 
@@ -137,8 +134,9 @@ if [ -n "$SSH_JUMP_HOST" ]; then
   ssh_jump="-J $SSH_USER@$SSH_JUMP_HOST"
 fi
 
-echo ">> [local] Connecting to remote host."
+echo ">> [local] Connecting to remote host: $SSH_USER@$SSH_HOST:$SSH_PORT."
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-  "$ssh_jump" "$SSH_USER@$SSH_HOST" -p "$SSH_PORT" \
+  "$SSH_USER@$SSH_HOST" -p "$SSH_PORT" \
   "$remote_command" \
   < /tmp/workspace.tar.bz2
+  
