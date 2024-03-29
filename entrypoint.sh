@@ -114,7 +114,7 @@ if $DOCKER_USE_STACK ; then
   remote_docker_exec="docker stack deploy -c \"$DOCKER_COMPOSE_FILENAME\" --prune \"$DOCKER_COMPOSE_PREFIX\" $DOCKER_PRE_ARGS $DOCKER_ARGS"
 fi
 if ! $WORKSPACE_KEEP ; then
-  remote_cleanup="cleanup() { log 'Removing workspace'; rm -rf \"$remote_path\"; }; trap cleanup EXIT;"
+  remote_cleanup="cleanup() { log 'Removing workspace'; rm -rf \"$remote_path\"; mkdir -p \"$remote_path\"; }; trap cleanup EXIT;"
 fi
 
 if [ -n "$CONTAINER_REGISTRY" ] || [ -n "$CONTAINER_REGISTRY_USERNAME" ] || [ -n "$CONTAINER_REGISTRY_PASSWORD" ]; then
