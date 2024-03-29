@@ -130,6 +130,12 @@ mkdir -p \"$remote_path\";
 log 'Unpacking workspace...';
 tar -C \"$remote_path\" -xjv;
 
+# Copy .env file to .env directory
+if [ -f \"../.env\" ]; then
+    log 'Copying .env file to ./.env...';
+    cp \"../.env\" \"$remote_path/.env\";
+fi
+
 $remote_cleanup
 $remote_registry_login
 
