@@ -36,6 +36,10 @@ if [ -z "$DOCKER_ARGS" ]; then
   DOCKER_ARGS="-d --remove-orphans --build"
 fi
 
+if [ -z "$DOCKER_PRE_ARGS" ]; then
+  DOCKER_PRE_ARGS=""
+fi
+
 if [ -z "$DOCKER_USE_STACK" ]; then
   DOCKER_USE_STACK=false
 else
@@ -46,6 +50,10 @@ else
 
   if [ -z "$DOCKER_ARGS" ]; then
     DOCKER_ARGS=""
+  fi
+
+  if [ -z "$DOCKER_PRE_ARGS" ]; then
+    DOCKER_PRE_ARGS=""
   fi
 fi
 
@@ -97,13 +105,13 @@ fi
 remote_path="\$HOME/$WORKSPACE"
 remote_cleanup=""
 remote_registry_login=""
-remote_docker_exec="docker compose -f \"$DOCKER_COMPOSE_FILENAME\" up $DOCKER_ARGS"
+remote_docker_exec="docker compose -f \"$DOCKER_COMPOSE_FILENAME\" $DOCKER_PRE_ARGS up $DOCKER_ARGS"
 if [ -n "$DOCKER_COMPOSE_PREFIX" ]; then
-  remote_docker_exec="docker compose -f \"$DOCKER_COMPOSE_FILENAME\" -p \"$DOCKER_COMPOSE_PREFIX\" up $DOCKER_ARGS"
+  remote_docker_exec="docker compose -f \"$DOCKER_COMPOSE_FILENAME\" -p \"$DOCKER_COMPOSE_PREFIX\" $DOCKER_PRE_ARGS up $DOCKER_ARGS"
 fi
 if $DOCKER_USE_STACK ; then
   remote_path="\$HOME/$WORKSPACE/$DOCKER_COMPOSE_PREFIX"
-  remote_docker_exec="docker stack deploy -c \"$DOCKER_COMPOSE_FILENAME\" --prune \"$DOCKER_COMPOSE_PREFIX\" $DOCKER_ARGS"
+  remote_docker_exec="docker stack deploy -c \"$DOCKER_COMPOSE_FILENAME\" --prune \"$DOCKER_COMPOSE_PREFIX\" $DOCKER_PRE_ARGS $DOCKER_ARGS"
 fi
 if ! $WORKSPACE_KEEP ; then
   remote_cleanup="cleanup() { log 'Removing workspace'; rm -rf \"$remote_path\"; }; trap cleanup EXIT;"
