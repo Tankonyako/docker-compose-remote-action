@@ -83,7 +83,7 @@ cleanup() {
 trap cleanup EXIT
 
 log "Packing workspace into archive to transfer onto remote machine"
-tar cjvf /tmp/workspace.tar.bz2 --exclude .git .
+tar cjf /tmp/workspace.tar.bz2 --exclude .git .
 
 log "Registering SSH keys"
 mkdir -p "$HOME/.ssh"
@@ -124,11 +124,14 @@ fi
 remote_command="set -e;
 log() { echo '>> [remote]' \$@ ; };
 
+log 'Removing workspace';
+rm -rf \"$remote_path\";
+
 log 'Creating workspace directory...';
 mkdir -p \"$remote_path\";
 
 log 'Unpacking workspace...';
-tar -C \"$remote_path\" -xjv;
+tar -C \"$remote_path\" -xj;
 
 # Determine the parent directory of remote path
 parent_dir=\$(dirname \"$remote_path\")
@@ -140,7 +143,6 @@ if [ -f \"\$parent_dir/.env\" ]; then
     cp \"\$parent_dir/.env\" \"$remote_path/\";
 fi
 
-$remote_cleanup
 $remote_registry_login
 
 log 'Launching docker compose... \"$remote_docker_exec\"';
