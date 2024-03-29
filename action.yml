@@ -31,6 +31,9 @@ inputs:
   docker_args:
     description: Docker compose command arguments.
     default: '-d --remove-orphans --build'
+  docker_pre_args:
+    description: Docker compose command arguments.
+    default: ''
   docker_use_stack:
     description: Use docker stack instead of docker compose ("true" or "false").
     default: 'false'
