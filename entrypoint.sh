@@ -124,7 +124,7 @@ fi
 remote_command="set -e;
 log() { echo '>> [remote]' \$@ ; };
 
-log 'Removing workspace';
+log 'Removing workspace \"$remote_path\"';
 rm -rf \"$remote_path\";
 
 log 'Creating workspace directory...';
