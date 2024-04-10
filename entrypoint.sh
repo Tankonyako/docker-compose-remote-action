@@ -155,7 +155,7 @@ $DOCKER_ENV $remote_docker_exec"
 ssh_jump=""
 if [ -n "$SSH_JUMP_HOST" ]; then
   ssh_jump="-J $SSH_USER@$SSH_JUMP_HOST"
-fi#!/bin/bash
+fi
 
 max_retries=5
 retry_delay=1
