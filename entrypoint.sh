@@ -130,6 +130,9 @@ rm -rf \"$remote_path\";
 log 'Creating workspace directory...';
 mkdir -p \"$remote_path\";
 
+log 'Install tar...';
+apt-get -y install gzip tar bzip2
+
 log 'Unpacking workspace...';
 tar -C \"$remote_path\" -xj;
 
