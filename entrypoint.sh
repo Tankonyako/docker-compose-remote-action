@@ -87,7 +87,7 @@ tar cjf /tmp/workspace.tar.bz2 --exclude .git .
 
 log "Registering SSH keys"
 mkdir -p "$HOME/.ssh"
-printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/private_key"
+printf '%s\n' "$SSH_PRIVATE_KEY" | awk 1 > "$HOME/.ssh/private_key"
 chmod 600 "$HOME/.ssh/private_key"
 
 log "Launching ssh agent"
