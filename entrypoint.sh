@@ -157,7 +157,7 @@ if [ -n "$SSH_JUMP_HOST" ]; then
   ssh_jump="-J $SSH_USER@$SSH_JUMP_HOST"
 fi
 
-max_retries=5
+max_retries=3
 retry_delay=1
 attempt=1
 success=false
@@ -182,24 +182,31 @@ while [ $attempt -le $max_retries ]; do
     if [ "$ssh_exit_status" -eq 0 ]; then
         success=true
         break
-    elif grep -q "Connection closed" "$ssh_output_file"; then
-        echo "Connection closed. Retrying in $retry_delay seconds..."
-        sleep $retry_delay
-        ((attempt++))  # Increment the attempt counter
     else
-        echo "Connection failed with an unexpected error. Exiting."
-        rm -f "$ssh_output_file"
-        exit 1
+        # Check if the output file contains "Connection closed" to indicate failure
+        if grep -q "Connection closed" "$ssh_output_file"; then
+            echo "Connection closed. Retrying in $retry_delay seconds..."
+        else
+            echo "Connection failed. Retrying in $retry_delay seconds..."
+        fi
+        sleep $retry_delay
+        attempt=$(echo "$attempt" | awk '{print $1 + 1}')
     fi
-
+    
     # Remove the temporary output file
     rm -f "$ssh_output_file"
 done
+
+if [ $attempt -gt $max_retries ]; then
+    echo "Max retries reached. Unable to establish connection."
+    exit 1
+fi
 
 if [ $success = true ]; then
     echo "Connection successful."
 else
     echo "Max retries reached. Unable to establish connection."
+    exit 1
 fi
 
   
