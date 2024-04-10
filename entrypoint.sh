@@ -165,16 +165,23 @@ success=false
 while [ $attempt -le $max_retries ]; do
     echo "Attempt $attempt of $max_retries: Connecting to remote host: $SSH_USER@$SSH_HOST:$SSH_PORT."
 
-    ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+    # Run SSH command and redirect stderr to /dev/null
+    ssh_output=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
         "$SSH_USER@$SSH_HOST" -p "$SSH_PORT" \
         "$remote_command" \
-        < /tmp/workspace.tar.bz2
+        < /tmp/workspace.tar.bz2 2>/dev/null)
 
+    # Check the exit status of the SSH command
     if [ $? -eq 0 ]; then
         success=true
         break
     else
-        echo "Connection failed. Retrying in $retry_delay seconds..."
+        # Check if the ssh_output contains "Connection closed" to indicate failure
+        if [[ "$ssh_output" == *"Connection closed"* ]]; then
+            echo "Connection closed. Retrying in $retry_delay seconds..."
+        else
+            echo "Connection failed. Retrying in $retry_delay seconds..."
+        fi
         sleep $retry_delay
         ((attempt++))
     fi
