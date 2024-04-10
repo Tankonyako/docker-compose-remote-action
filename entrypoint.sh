@@ -165,19 +165,26 @@ success=false
 while [ $attempt -le $max_retries ]; do
     echo "Attempt $attempt of $max_retries: Connecting to remote host: $SSH_USER@$SSH_HOST:$SSH_PORT."
 
-    # Run SSH command and redirect stderr to /dev/null
-    ssh_output=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-        "$SSH_USER@$SSH_HOST" -p "$SSH_PORT" \
-        "$remote_command" \
-        < /tmp/workspace.tar.bz2 2>/dev/null)
+    # Run SSH command, stream output to console and capture output and errors in a temporary file
+    ssh_output_file=$(mktemp)
+    {
+        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            "$SSH_USER@$SSH_HOST" -p "$SSH_PORT" \
+            "$remote_command" \
+            < /tmp/workspace.tar.bz2 
+        echo "SSH_EXIT_STATUS: $?" # Capture exit status of SSH command
+    } | tee "$ssh_output_file"
+
+    # Extract exit status from the temporary file
+    ssh_exit_status=$(grep "SSH_EXIT_STATUS:" "$ssh_output_file" | cut -d' ' -f2)
 
     # Check the exit status of the SSH command
-    if [ $? -eq 0 ]; then
+    if [ "$ssh_exit_status" -eq 0 ]; then
         success=true
         break
     else
-        # Check if the ssh_output contains "Connection closed" to indicate failure
-        if [[ "$ssh_output" == *"Connection closed"* ]]; then
+        # Check if the output file contains "Connection closed" to indicate failure
+        if grep -q "Connection closed" "$ssh_output_file"; then
             echo "Connection closed. Retrying in $retry_delay seconds..."
         else
             echo "Connection failed. Retrying in $retry_delay seconds..."
@@ -185,6 +192,9 @@ while [ $attempt -le $max_retries ]; do
         sleep $retry_delay
         ((attempt++))
     fi
+
+    # Remove the temporary output file
+    rm -f "$ssh_output_file"
 done
 
 if [ $success = true ]; then
