@@ -155,11 +155,35 @@ $DOCKER_ENV $remote_docker_exec"
 ssh_jump=""
 if [ -n "$SSH_JUMP_HOST" ]; then
   ssh_jump="-J $SSH_USER@$SSH_JUMP_HOST"
+fi#!/bin/bash
+
+max_retries=5
+retry_delay=1
+attempt=1
+success=false
+
+while [ $attempt -le $max_retries ]; do
+    echo "Attempt $attempt of $max_retries: Connecting to remote host: $SSH_USER@$SSH_HOST:$SSH_PORT."
+
+    ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+        "$SSH_USER@$SSH_HOST" -p "$SSH_PORT" \
+        "$remote_command" \
+        < /tmp/workspace.tar.bz2
+
+    if [ $? -eq 0 ]; then
+        success=true
+        break
+    else
+        echo "Connection failed. Retrying in $retry_delay seconds..."
+        sleep $retry_delay
+        ((attempt++))
+    fi
+done
+
+if [ $success = true ]; then
+    echo "Connection successful."
+else
+    echo "Max retries reached. Unable to establish connection."
 fi
 
-echo ">> [local] Connecting to remote host: $SSH_USER@$SSH_HOST:$SSH_PORT."
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-  "$SSH_USER@$SSH_HOST" -p "$SSH_PORT" \
-  "$remote_command" \
-  < /tmp/workspace.tar.bz2
   
