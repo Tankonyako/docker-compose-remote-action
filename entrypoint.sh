@@ -190,7 +190,7 @@ while [ $attempt -le $max_retries ]; do
             echo "Connection failed. Retrying in $retry_delay seconds..."
         fi
         sleep $retry_delay
-        attempt=$(awk '{print $1 + 1}' <<< "$attempt") # Increment the attempt counter
+        attempt=$(echo "$attempt" | awk '{print $1 + 1}')
     fi
 
     # Remove the temporary output file
