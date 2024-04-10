@@ -36,7 +36,7 @@ if [ -z "$DOCKER_ARGS" ]; then
   DOCKER_ARGS="-d --remove-orphans --build"
 fi
 
-if [ -z "$DOCKER_PRE_ARGS" ]; then
+if [ -z "${DOCKER_PRE_ARGS+x}" ]; then
   DOCKER_PRE_ARGS=""
 fi
 
