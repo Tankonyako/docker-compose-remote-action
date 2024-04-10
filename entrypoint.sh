@@ -187,7 +187,9 @@ while [ $attempt -le $max_retries ]; do
         if grep -q "Connection closed" "$ssh_output_file"; then
             echo "Connection closed. Retrying in $retry_delay seconds..."
         else
-            echo "Connection failed. Retrying in $retry_delay seconds..."
+            echo "Connection failed with an unexpected error. Exiting."
+            rm -f "$ssh_output_file"
+            exit 1
         fi
         sleep $retry_delay
         attempt=$(echo "$attempt" | awk '{print $1 + 1}')
