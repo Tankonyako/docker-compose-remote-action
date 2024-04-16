@@ -51,6 +51,9 @@ inputs:
     description: Container registry username to use.
   container_registry_password:
     description: Container registry password to use.
+  max_retries:
+    description: Max retries.
+    default: 3
 runs:
   using: docker
   image: Dockerfile
@@ -73,3 +76,4 @@ runs:
     CONTAINER_REGISTRY: ${{ inputs.container_registry }}
     CONTAINER_REGISTRY_USERNAME: ${{ inputs.container_registry_username }}
     CONTAINER_REGISTRY_PASSWORD: ${{ inputs.container_registry_password }}
+    MAX_RETRIES: ${{ inputs.max_retries }}

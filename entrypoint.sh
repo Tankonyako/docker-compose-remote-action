@@ -16,6 +16,10 @@ if [ -z "$SSH_PORT" ]; then
   SSH_PORT=22
 fi
 
+if [ -z "$MAX_RETRIES" ]; then
+  MAX_RETRIES=3
+fi
+
 if [ -n "$SSH_JUMP_HOST" ]; then
     if [ -z "$SSH_JUMP_PUBLIC_KEY" ]; then
         echo "Input ssh_jump_public_key is required!"
@@ -157,7 +161,7 @@ if [ -n "$SSH_JUMP_HOST" ]; then
   ssh_jump="-J $SSH_USER@$SSH_JUMP_HOST"
 fi
 
-max_retries=3
+max_retries=$MAX_RETRIES
 retry_delay=1
 attempt=1
 success=false
